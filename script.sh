@@ -272,7 +272,7 @@ case $1 in
             echo "No viewer specified. Use one of: cat, less, more."
             exit 1
         fi
-        echo "Are you sure that you want to change your default profile viwer from $DEFAULT_PROFILE_VIEWER to $NEW_VIEWE?[y/n]"
+        echo "Are you sure that you want to change your default profile viwer from $DEFAULT_PROFILE_VIEWER to $NEW_VIEWER?[y/n]"
         confirm3=x
         while true
         do
@@ -322,7 +322,8 @@ case $1 in
                             y|Y)
                                 DEFAULT_PROFILE_EDITOR="$NEW_EDITOR"
                                 echo "Default profile editor set to '$DEFAULT_PROFILE_EDITOR'"
-                                break 2  # exits both loops
+                                echo "$DEFAULT_PROFILE_VIEWER" > "$DEFAULT_PROFILE_VIEWER_FILE"
+                                break 2 
                                 ;;
                             n|N)
                                 echo "Canceled. No changes made."
@@ -336,7 +337,7 @@ case $1 in
                     ;;
                 *)
                     echo "'$NEW_EDITOR' is not supported. Choose from: nano, vi, gedit, code"
-                    read -rp "Try again. Enter valid editor: " NEW_EDITOR
+                    read -rp "Try again. Enter valid editor: " $NEW_EDITOR
                     ;;
             esac
         done
@@ -552,7 +553,7 @@ case $1 in
         echo "  --locate-default-profiles-folder / -ldpf         Show current default profile folder"
         echo "  --set-default-profile-viewer / -sdpv <viewer>    Set default viewer: cat, less, or more"
         echo "  --set-default-proxyfix-editor / -sdpe <editor>   Set default editor: nano, vi, gedit, code"
-    ;:
+    ;;
 
     *)
         echo "Invalid argument. Use -h for help."
