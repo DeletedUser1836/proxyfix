@@ -1,6 +1,23 @@
 #!/bin/bash
 
-# Uncomment to show warning when not running as root
+#########################################################
+#==INFO==                                               #
+#MADE BY: DeletedUser1836                               #
+#VERSION: 1.0.0.1                                       #
+#DATE OF CREATION: 04/05.2025                           #
+#LAST UPDATE: ??.??.????                                #
+#                                                       #
+#==CREDITS==:                                           #
+# -me(main author)                                      #
+# -myself(testing)                                      #
+# -My Mom, Dad and ChatGPT(feedback)                    #
+#                                                       #
+#GITHUB: https://github.com/DeletedUser1836/proxyfix    #
+#LICENSE: If you want to use it pls leave ma a star     #
+#         on my github page of the project <3           # 
+#########################################################
+
+# Comment to hide warning when not running as root
 if [ $USER != "root" ]; then
     echo "You are not rooted (current user: $USER)"
     echo "This can cause issues while using the program"
