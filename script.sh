@@ -190,6 +190,20 @@ case $1 in
             esac
         done
     ;;
+    # === Profiles Part  ===
+    
+    -ldpf|--locate-default-profiles-folder)
+        # Show current default profiles folder
+        if [[ -f "$DEFAULT_PROFILE_DIR_FILE" ]]; then
+            echo "Current default profiles folder:"
+            echo "$DEFAULT_PROFILE_DIR"
+        else
+            echo "No default profiles folder set."
+            echo "Use '--set-default-profiles-folder <path>' to set one."
+        fi
+    ;;
+
+
 
     -h|-H|-?|--help)
         echo "> $(basename "$0") arguments:"
