@@ -9,12 +9,13 @@
 PROXCONF=$(locate proxychains | grep -E '\.conf$' | head -n 1)
 
 # === Default global settings for profile system ===
-DEFAULT_PROFILE_DIR=$(cat "$DEFAULT_PROFILE_DIR_FILE")
-DEFAULT_PROFILE_VIEWER=$(cat "$DEFAULT_PROFILE_VIEWER_FILE")
 DEFAULT_PROFILE_DIR_FILE="$HOME/.proxyfix_default_profiles_dir"
 DEFAULT_PROFILE_VIEWER_FILE="$HOME/.proxyfix_default_profile_viewer"
-DEFAULT_PROFILE_EDITOR="$HOME/.proxyfix_default_editor"
+DEFAULT_PROFILE_EDITOR_FILE="$HOME/.proxyfix_default_editor"
 DEFAULT_PROFILE_FILE="$HOME/.proxyfix_default_profile"
+DEFAULT_PROFILE_DIR=$(cat "$DEFAULT_PROFILE_DIR_FILE")
+DEFAULT_PROFILE_VIEWER=$(cat "$DEFAULT_PROFILE_VIEWER_FILE")
+DEFAULT_PROFILE_EDITOR=$(cat "$DEFAULT_PROFILE_EDITOR_FILE")
 DEFAULT_PROFILE_NAME=$(cat "$DEFAULT_PROFILE_FILE")
 
 if [[ ! -f "$DEFAULT_PROFILE_FILE" ]]
@@ -34,12 +35,17 @@ then
     echo "cat" > "$DEFAULT_PROFILE_VIEWER_FILE"
 fi
 
+if [[ ! -f "$DEFAULT_PROFILE_EDITOR_FILE" ]]
+then
+    echo "nano" > "$DEFAULT_PROFILE_EDITOR_FILE"
+fi
+
 ensure_profile_folder_exists()
 {
-    if [[ ! -d "$DEFAULT_PROFILE_FOLDER" ]]
+    if [[ ! -d "$DEFAULT_PROFILE_DIR" ]]
     then
-        mkdir -p "$DEFAULT_PROFILE_FOLDER"
-        echo "No default profiles folder set. Created: $DEFAULT_PROFILE_FOLDER"
+        mkdir -p "$DEFAULT_PROFILE_DIR"
+        echo "No default profiles folder set. Created: $DEFAULT_PROFILE_DIR"
         echo "To change it, use: proxyfix --set-default-profiles-folder <path>"
     fi
 }
@@ -55,7 +61,7 @@ profile_not_found_404()
 {
     if [[ ! -f "$PROFILE_PATH" ]]
     then
-        echo "Profile '$PROFILE_NAME' not found(404) in $DEFAULT_PROFILE_FOLDER"
+        echo "Profile '$PROFILE_NAME' not found(404) in $DEFAULT_PROFILE_DIR"
         exit 404
     fi
 }
@@ -225,9 +231,9 @@ case $1 in
             esac
         done
     ;;
+
     # === Profiles Part  ===
-    
-    -ldpf|--locate-default-profiles-folder)
+    -LdPf|--locate-default-profiles-folder)
         if [[ -f "$DEFAULT_PROFILE_DIR_FILE" ]]
         then
             echo "Current default profiles folder:"
@@ -238,11 +244,11 @@ case $1 in
         fi
     ;;
 
-    -ldp|--locate-default-profile)
+    -LdP|--locate-default-profile)
         echo "$DEFAULT_PROFILE_NAME"
     ;;
 
-    -sdpf|--set-default-profiles-folder)
+    -SdPf|--set-default-profiles-folder)
         if [[ -z "$2" ]]
         then
             echo "Error: You must provide a folder path."
@@ -255,16 +261,16 @@ case $1 in
         shift
     ;;
 
-    -sdp|--set-default-profile)
+    -SdP|--set-default-profile)
         PROFILE_NAME="$2"
         ensure_profile_name_was_given
         ensure_profile_folder_exists
-        PROFILE_PATH="${DEFAULT_PROFILE_FOLDER}/${PROFILE_NAME}.conf"
+        PROFILE_PATH="${DEFAULT_PROFILE_DIR}/${PROFILE_NAME}.conf"
         profile_not_found_404
         echo "$PROFILE_NAME" > "$DEFAULT_PROFILE_FILE"
     ;;
 
-    -sdpv|--set-default-profile-viewer)
+    -SdPv|--set-default-profile-viewer)
         NEW_VIEWER="$2"
 
         if [[ -z "$NEW_VIEWER" ]]
@@ -301,7 +307,7 @@ case $1 in
         done
     ;;
 
-    -sdpe|--set-default-proxyfix-editor)
+    -SdPe|--set-default-proxyfix-editor)
         while true
         do
             NEW_EDITOR="$2"
@@ -351,7 +357,7 @@ case $1 in
 
         ensure_profile_folder_exists
 
-        PROFILE_PATH="${DEFAULT_PROFILE_FOLDER}/${PROFILE_NAME}.conf"
+        PROFILE_PATH="${DEFAULT_PROFILE_DIR}/${PROFILE_NAME}.conf"
 
         grep -E '^\s*(socks4|socks5|http|https)\s+' "$PROXCONF" > "$PROFILE_PATH"
 
@@ -365,7 +371,7 @@ case $1 in
 
         ensure_profile_folder_exists
 
-        PROFILE_PATH="${DEFAULT_PROFILE_FOLDER}/${PROFILE_NAME}.conf"
+        PROFILE_PATH="${DEFAULT_PROFILE_DIR}/${PROFILE_NAME}.conf"
 
         profile_not_found_404
 
@@ -404,7 +410,7 @@ case $1 in
 
         ensure_profile_folder_exists
 
-        PROFILE_PATH="${DEFAULT_PROFILE_FOLDER}/${PROFILE_NAME}.conf"
+        PROFILE_PATH="${DEFAULT_PROFILE_DIR}/${PROFILE_NAME}.conf"
 
         profile_not_found_404
 
@@ -419,7 +425,7 @@ case $1 in
 
         ensure_profile_folder_exists
 
-        PROFILE_PATH="${DEFAULT_PROFILE_FOLDER}/${PROFILE_NAME}.conf"
+        PROFILE_PATH="${DEFAULT_PROFILE_DIR}/${PROFILE_NAME}.conf"
 
         profile_not_found_404
 
@@ -449,10 +455,10 @@ case $1 in
     -lp|--list-profiles)
         ensure_profile_folder_exists
 
-        echo "Available profiles in $DEFAULT_PROFILE_FOLDER:"
-        if ls "$DEFAULT_PROFILE_FOLDER"/*.conf &>/dev/null
+        echo "Available profiles in $DEFAULT_PROFILE_DIR:"
+        if ls "$DEFAULT_PROFILE_DIR"/*.conf &>/dev/null
         then
-            for file in "$DEFAULT_PROFILE_FOLDER"/*.conf
+            for file in "$DEFAULT_PROFILE_DIR"/*.conf
             do
                 basename "$file" .conf
             done
@@ -467,7 +473,7 @@ case $1 in
         ensure_profile_name_was_given
         ensure_profile_folder_exists
 
-        PROFILE_PATH="${DEFAULT_PROFILE_FOLDER}/${PROFILE_NAME}.conf"
+        PROFILE_PATH="${DEFAULT_PROFILE_DIR}/${PROFILE_NAME}.conf"
         profile_not_found_404
 
         if [[ "$DEFAULT_PROFILE_VIEWER" != "cat" && "$DEFAULT_PROFILE_VIEWER" != "less" && "$DEFAULT_PROFILE_VIEWER" != "more" ]]
@@ -479,43 +485,43 @@ case $1 in
         $DEFAULT_PROFILE_VIEWER "$PROFILE_PATH"
     ;;
 
-    -vpm|--view-profile-more)
+    -vPm|--view-profile-more)
         PROFILE_NAME="$2"
 
         ensure_profile_name_was_given
         ensure_profile_folder_exists
 
-        PROFILE_PATH="${DEFAULT_PROFILE_FOLDER}/${PROFILE_NAME}.conf"
+        PROFILE_PATH="${DEFAULT_PROFILE_DIR}/${PROFILE_NAME}.conf"
         profile_not_found_404
 
         more "$PROFILE_PATH"
     ;;
 
-    -vpl|--view-profile-less)
+    -vPl|--view-profile-less)
         PROFILE_NAME="$2"
 
         ensure_profile_name_was_given
         ensure_profile_folder_exists
 
-        PROFILE_PATH="${DEFAULT_PROFILE_FOLDER}/${PROFILE_NAME}.conf"
+        PROFILE_PATH="${DEFAULT_PROFILE_DIR}/${PROFILE_NAME}.conf"
         profile_not_found_404
 
         less "$PROFILE_PATH"
     ;;
 
-    -vpc|--view-profile-cat)
+    -vPc|--view-profile-cat)
         PROFILE_NAME="$2"
 
         ensure_profile_name_was_given
         ensure_profile_folder_exists
 
-        PROFILE_PATH="${DEFAULT_PROFILE_FOLDER}/${PROFILE_NAME}.conf"
+        PROFILE_PATH="${DEFAULT_PROFILE_DIR}/${PROFILE_NAME}.conf"
         profile_not_found_404
 
         cat "$PROFILE_PATH"
     ;;
 
-    -h|-H|-?|--help)
+    -h|-?|--help)
         echo ""
         echo "> $(basename "$0") arguments:"
         echo "> -E OR --edit                # Edit entire proxychains config file"
@@ -546,13 +552,13 @@ case $1 in
         echo "  If no default profile folder is set, one will be created at ~/ProxyFixProfiles"
     ;;
 
-    -hD|-?d|--help-defaults)
+    -hd|-?d|--help-defaults)
         echo ""
         echo "ProxyFix Default/Settings Help:"
-        echo "  --set-default-profiles-folder  / -sdpf <path>    Set default folder for saved profiles"
-        echo "  --locate-default-profiles-folder / -ldpf         Show current default profile folder"
-        echo "  --set-default-profile-viewer / -sdpv <viewer>    Set default viewer: cat, less, or more"
-        echo "  --set-default-proxyfix-editor / -sdpe <editor>   Set default editor: nano, vi, gedit, code"
+        echo "  --set-default-profiles-folder  / -SdPf <path>    Set default folder for saved profiles"
+        echo "  --locate-default-profiles-folder / -LdPf         Show current default profile folder"
+        echo "  --set-default-profile-viewer / -SdPv <viewer>    Set default viewer: cat, less, or more"
+        echo "  --set-default-proxyfix-editor / -SdPe <editor>   Set default editor: nano, vi, gedit, code"
     ;;
 
     *)
