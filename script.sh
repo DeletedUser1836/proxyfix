@@ -24,6 +24,16 @@ then
     echo "cat" > "$DEFAULT_PROFILE_VIEWER_FILE"
 fi
 
+ensure_profile_folder_exists() {
+    if [[ ! -d "$DEFAULT_PROFILE_FOLDER" ]]
+    then
+        mkdir -p "$DEFAULT_PROFILE_FOLDER"
+        echo "No default profiles folder set. Created: $DEFAULT_PROFILE_FOLDER"
+        echo "To change it, use: proxyfix --set-default-profiles-folder <path>"
+    fi
+}
+
+
 
 if [[ -z "$PROXCONF" ]]
 then
@@ -193,8 +203,8 @@ case $1 in
     # === Profiles Part  ===
     
     -ldpf|--locate-default-profiles-folder)
-        # Show current default profiles folder
-        if [[ -f "$DEFAULT_PROFILE_DIR_FILE" ]]; then
+        if [[ -f "$DEFAULT_PROFILE_DIR_FILE" ]]
+        then
             echo "Current default profiles folder:"
             echo "$DEFAULT_PROFILE_DIR"
         else
@@ -203,6 +213,36 @@ case $1 in
         fi
     ;;
 
+    -sdpf|--set-default-profiles-folder)
+        if [[ -z "$2" ]]
+        then
+            echo "Error: You must provide a folder path."
+            echo "Usage: --set-default-profiles-folder <path>"
+        else
+            mkdir -p "$2"
+            echo "$2" > "$DEFAULT_PROFILE_DIR_FILE"
+            echo "Default profiles folder set to: $2"
+        fi
+        shift
+    ;;
+
+    -sp|--save-profile)
+        PROFILE_NAME="$2"
+
+        if [[ -z "$PROFILE_NAME" ]]
+        then
+            echo "You must provide a profile name. Usage: proxyfix --save-profile <name>"
+            exit 1
+        fi
+
+        ensure_profile_folder_exists
+
+        PROFILE_PATH="${DEFAULT_PROFILE_FOLDER}/${PROFILE_NAME}.conf"
+
+        grep -E '^\s*(socks4|socks5|http|https)\s+' "$PROXCONF" > "$PROFILE_PATH"
+
+        echo "Saved profile '$PROFILE_NAME' to: $PROFILE_PATH"
+    ;;
 
 
     -h|-H|-?|--help)
