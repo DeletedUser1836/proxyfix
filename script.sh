@@ -343,7 +343,20 @@ case $1 in
         done
     ;;
 
+    -lp|--list-profiles)
+        ensure_profile_folder_exists
 
+        echo "Available profiles in $DEFAULT_PROFILE_FOLDER:"
+        if ls "$DEFAULT_PROFILE_FOLDER"/*.conf &>/dev/null
+        then
+            for file in "$DEFAULT_PROFILE_FOLDER"/*.conf
+            do
+                basename "$file" .conf
+            done
+        else
+            echo "(No profiles found)"
+        fi
+    ;;
 
     -h|-H|-?|--help)
         echo "> $(basename "$0") arguments:"
