@@ -358,6 +358,60 @@ case $1 in
         fi
     ;;
 
+        -vp|--view-profile)
+        PROFILE_NAME="$2"
+
+        ensure_profile_name_was_given
+        ensure_profile_folder_exists
+
+        PROFILE_PATH="${DEFAULT_PROFILE_FOLDER}/${PROFILE_NAME}.conf"
+        profile_not_found_404
+
+        if [[ "$DEFAULT_PROFILE_VIEWER" != "cat" && "$DEFAULT_PROFILE_VIEWER" != "less" && "$DEFAULT_PROFILE_VIEWER" != "more" ]]
+        then
+            echo "Unknown default viewer '$DEFAULT_PROFILE_VIEWER'. Falling back to 'cat'."
+            DEFAULT_PROFILE_VIEWER="cat"
+        fi
+
+        $DEFAULT_PROFILE_VIEWER "$PROFILE_PATH"
+    ;;
+
+    -vpm|--view-profile-more)
+        PROFILE_NAME="$2"
+
+        ensure_profile_name_was_given
+        ensure_profile_folder_exists
+
+        PROFILE_PATH="${DEFAULT_PROFILE_FOLDER}/${PROFILE_NAME}.conf"
+        profile_not_found_404
+
+        more "$PROFILE_PATH"
+    ;;
+
+    -vpl|--view-profile-less)
+        PROFILE_NAME="$2"
+
+        ensure_profile_name_was_given
+        ensure_profile_folder_exists
+
+        PROFILE_PATH="${DEFAULT_PROFILE_FOLDER}/${PROFILE_NAME}.conf"
+        profile_not_found_404
+
+        less "$PROFILE_PATH"
+    ;;
+
+    -vpc|--view-profile-cat)
+        PROFILE_NAME="$2"
+
+        ensure_profile_name_was_given
+        ensure_profile_folder_exists
+
+        PROFILE_PATH="${DEFAULT_PROFILE_FOLDER}/${PROFILE_NAME}.conf"
+        profile_not_found_404
+
+        cat "$PROFILE_PATH"
+    ;;
+
     -h|-H|-?|--help)
         echo "> $(basename "$0") arguments:"
         echo "> -E OR --edit                # Edit entire proxychains config file"
@@ -367,6 +421,27 @@ case $1 in
         echo "> -elcl OR --edit-list-clear  # Clear proxy list before editing"
         echo "> -cl OR --clear              # Just clear proxy list"
         echo "> -h OR any help flag         # Show this help message"
+    ;;
+
+        -hp|--help-profiles|-?p)
+        echo ""
+        echo "Profile management options:"
+        echo "  -sp,  --save-profile <name>                     #Save current proxy list as a named profile"
+        echo "  -cp,  --change-profile <name>                   #Replace proxychains.conf with selected profile"
+        echo "  -ep,  --edit-profile <name>                     #Edit selected profile using the default editor"
+        echo "  -dp,  --delete-profile <name>                   #Delete selected profile (with confirmation)"
+        echo "  -lp,  --list-profiles                           #Show list of all saved profiles"
+        echo "  -vp,  --view-profile <name>                     #View profile content using default or chosen viewer"
+        echo "        --view-profile-more / -vpm                #View profile with 'more'"
+        echo "        --view-profile-less / -vpl                #View profile with 'less'"
+        echo "        --view-profile-cat / -vpc                 #View profile with 'cat'"
+        echo ""
+        echo "  -cdpv,--change-default-profile-view <viewer>    #Change default viewer to: cat / less / more"
+        echo "  -sdpf,--set-default-profiles-folder <path>      #Set default folder for profiles"
+        echo "  -ldpf,--locate-default-profiles-folder          #Show current default profile folder"
+
+        echo "Note:"
+        echo "  If no default profile folder is set, one will be created at ~/ProxyFixProfiles"
     ;;
 
     *)
