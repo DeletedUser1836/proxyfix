@@ -13,7 +13,16 @@ DEFAULT_PROFILE_DIR=$(cat "$DEFAULT_PROFILE_DIR_FILE")
 DEFAULT_PROFILE_VIEWER=$(cat "$DEFAULT_PROFILE_VIEWER_FILE")
 DEFAULT_PROFILE_DIR_FILE="$HOME/.proxyfix_default_profiles_dir"
 DEFAULT_PROFILE_VIEWER_FILE="$HOME/.proxyfix_default_profile_viewer"
-DEFAULT_PROFILE_EDITOR="$HOME/." #TODO
+DEFAULT_PROFILE_EDITOR="$HOME/.proxyfix_default_editor"
+DEFAULT_PROFILE_FILE="$HOME/.proxyfix_default_profile"
+DEFAULT_PROFILE_NAME=$(cat "$DEFAULT_PROFILE_FILE")
+
+if [[ ! -f "$DEFAULT_PROFILE_FILE" ]]
+then
+    echo "default" > "$DEFAULT_PROFILE_FILE"
+    mkdir -p "$HOME/ProxyFixProfiles"
+    echo "socks5 127.0.0.1 9050" > "$HOME/ProxyFixProfiles/default.conf"
+fi
 
 if [[ ! -f "$DEFAULT_PROFILE_DIR_FILE" ]]
 then
@@ -229,6 +238,10 @@ case $1 in
         fi
     ;;
 
+    -ldp|--locate-default-profile)
+        echo "$DEFAULT_PROFILE_NAME"
+    ;;
+
     -sdpf|--set-default-profiles-folder)
         if [[ -z "$2" ]]
         then
@@ -240,6 +253,15 @@ case $1 in
             echo "Default profiles folder set to: $2"
         fi
         shift
+    ;;
+
+    -sdp|--set-default-profile)
+        PROFILE_NAME="$2"
+        ensure_profile_name_was_given
+        ensure_profile_folder_exists
+        PROFILE_PATH="${DEFAULT_PROFILE_FOLDER}/${PROFILE_NAME}.conf"
+        profile_not_found_404
+        echo "$PROFILE_NAME" > "$DEFAULT_PROFILE_FILE"
     ;;
 
     -sdpv|--set-default-profile-viewer)
