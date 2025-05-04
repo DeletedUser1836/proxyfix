@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Uncomment to show warning when not running as root
-# if [ $USER != "root" ]; then
-#     echo "You are not rooted (current user: $USER)"
-#     echo "This can cause issues while using the program"
-# fi
+if [ $USER != "root" ]; then
+    echo "You are not rooted (current user: $USER)"
+    echo "This can cause issues while using the program"
+fi
 
 PROXCONF=$(locate proxychains | grep -E '\.conf$' | head -n 1)
 
