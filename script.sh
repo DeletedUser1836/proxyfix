@@ -13,6 +13,7 @@ DEFAULT_PROFILE_DIR=$(cat "$DEFAULT_PROFILE_DIR_FILE")
 DEFAULT_PROFILE_VIEWER=$(cat "$DEFAULT_PROFILE_VIEWER_FILE")
 DEFAULT_PROFILE_DIR_FILE="$HOME/.proxyfix_default_profiles_dir"
 DEFAULT_PROFILE_VIEWER_FILE="$HOME/.proxyfix_default_profile_viewer"
+DEFAULT_PROFILE_EDITOR="$HOME/." #TODO
 
 if [[ ! -f "$DEFAULT_PROFILE_DIR_FILE" ]]
 then
@@ -241,6 +242,85 @@ case $1 in
         shift
     ;;
 
+    -sdpv|--set-default-profile-viewer)
+        NEW_VIEWER="$2"
+
+        if [[ -z "$NEW_VIEWER" ]]
+        then
+            echo "No viewer specified. Use one of: cat, less, more."
+            exit 1
+        fi
+        echo "Are you sure that you want to change your default profile viwer from $DEFAULT_PROFILE_VIEWER to $NEW_VIEWE?[y/n]"
+        confirm3=x
+        while true
+        do
+            case $confirm3 in
+                y)
+                    case "$NEW_VIEWER" in
+                    cat|less|more)
+                        DEFAULT_PROFILE_VIEWER="$NEW_VIEWER"
+                        echo "Default profile viewer set to '$DEFAULT_PROFILE_VIEWER'"
+                        exit 0
+                    ;;
+                    *)
+                        echo "Invalid viewer '$NEW_VIEWER'. Allowed values are: cat, less, more."
+                        exit 1
+                    ;;
+                    esac
+                ;;
+                n)
+                    echo "Abort."
+                    exit 0;
+                ;;
+                *)
+                    echo "Invalid argument. Choose between 'y' or 'n'."
+                ;;
+                esac
+        done
+    ;;
+
+    -sdpe|--set-default-proxyfix-editor)
+        while true
+        do
+            NEW_EDITOR="$2"
+
+            if [[ -z "$NEW_EDITOR" ]]
+            then
+                echo "You didn't specify an editor. Choose one of: nano, vi, gedit, code"
+                read -rp "Enter editor name: " NEW_EDITOR
+            fi
+
+            case "$NEW_EDITOR" in
+                nano|vi|gedit|code)
+                    while true
+                    do
+                        echo "You're about to set '$NEW_EDITOR' as your default profile editor."
+                        read -rp "Confirm? (y/n): " confirm
+                        case "$confirm" in
+                            y|Y)
+                                DEFAULT_PROFILE_EDITOR="$NEW_EDITOR"
+                                echo "Default profile editor set to '$DEFAULT_PROFILE_EDITOR'"
+                                break 2  # exits both loops
+                                ;;
+                            n|N)
+                                echo "Canceled. No changes made."
+                                break 2
+                                ;;
+                            *)
+                                echo "Invalid input. Please type 'y' or 'n'."
+                                ;;
+                        esac
+                    done
+                    ;;
+                *)
+                    echo "'$NEW_EDITOR' is not supported. Choose from: nano, vi, gedit, code"
+                    read -rp "Try again. Enter valid editor: " NEW_EDITOR
+                    ;;
+            esac
+        done
+    ;;
+
+
     -sp|--save-profile)
         PROFILE_NAME="$2"
 
@@ -358,7 +438,7 @@ case $1 in
         fi
     ;;
 
-        -vp|--view-profile)
+    -vp|--view-profile)
         PROFILE_NAME="$2"
 
         ensure_profile_name_was_given
@@ -413,6 +493,7 @@ case $1 in
     ;;
 
     -h|-H|-?|--help)
+        echo ""
         echo "> $(basename "$0") arguments:"
         echo "> -E OR --edit                # Edit entire proxychains config file"
         echo "> -l OR --list                # List active proxies"
@@ -421,9 +502,11 @@ case $1 in
         echo "> -elcl OR --edit-list-clear  # Clear proxy list before editing"
         echo "> -cl OR --clear              # Just clear proxy list"
         echo "> -h OR any help flag         # Show this help message"
+        echo "> -hp OR any help falg + p    # Show help message about profiles"
+        echo "> -hD OR any help flag + D    # Show help message about defaults"
     ;;
 
-        -hp|--help-profiles|-?p)
+    -hp|--help-profiles|-?p)
         echo ""
         echo "Profile management options:"
         echo "  -sp,  --save-profile <name>                     #Save current proxy list as a named profile"
@@ -436,13 +519,18 @@ case $1 in
         echo "        --view-profile-less / -vpl                #View profile with 'less'"
         echo "        --view-profile-cat / -vpc                 #View profile with 'cat'"
         echo ""
-        echo "  -cdpv,--change-default-profile-view <viewer>    #Change default viewer to: cat / less / more"
-        echo "  -sdpf,--set-default-profiles-folder <path>      #Set default folder for profiles"
-        echo "  -ldpf,--locate-default-profiles-folder          #Show current default profile folder"
-
         echo "Note:"
         echo "  If no default profile folder is set, one will be created at ~/ProxyFixProfiles"
     ;;
+
+    -hD|-?d|--help-defaults)
+        echo ""
+        echo "ProxyFix Default/Settings Help:"
+        echo "  --set-default-profiles-folder  / -sdpf <path>    Set default folder for saved profiles"
+        echo "  --locate-default-profiles-folder / -ldpf         Show current default profile folder"
+        echo "  --set-default-profile-viewer / -sdpv <viewer>    Set default viewer: cat, less, or more"
+        echo "  --set-default-proxyfix-editor / -sdpe <editor>   Set default editor: nano, vi, gedit, code"
+    ;:
 
     *)
         echo "Invalid argument. Use -h for help."
