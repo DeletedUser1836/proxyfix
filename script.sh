@@ -41,7 +41,14 @@ ensure_profile_name_was_given()
         exit 1
     fi
 }
-
+profile_not_found_404()
+{
+    if [[ ! -f "$PROFILE_PATH" ]]
+    then
+        echo "Profile '$PROFILE_NAME' not found(404) in $DEFAULT_PROFILE_FOLDER"
+        exit 404
+    fi
+}
 
 if [[ -z "$PROXCONF" ]]
 then
@@ -257,11 +264,7 @@ case $1 in
 
         PROFILE_PATH="${DEFAULT_PROFILE_FOLDER}/${PROFILE_NAME}.conf"
 
-        if [[ ! -f "$PROFILE_PATH" ]]
-        then
-            echo "Profile '$PROFILE_NAME' not found in $DEFAULT_PROFILE_FOLDER"
-            exit 1
-        fi
+        profile_not_found_404
 
         echo -n "Are you sure you want to replace contents of $PROXCONF with profile '$PROFILE_NAME'? [y/n]: "
         while true
@@ -289,6 +292,21 @@ case $1 in
                 ;;
             esac
         done
+    ;;
+
+    -ep|--edit-profile)
+        PROFILE_NAME="$2"
+
+        ensure_profile_name_was_given
+
+        ensure_profile_folder_exists
+
+        PROFILE_PATH="${DEFAULT_PROFILE_FOLDER}/${PROFILE_NAME}.conf"
+
+        profile_not_found_404
+
+        echo "Opening profile '$PROFILE_NAME' for editing..."
+        ${DEFAULT_PROFILE_VIEWER:-nano} "$PROFILE_PATH"
     ;;
 
 
