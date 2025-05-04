@@ -309,6 +309,41 @@ case $1 in
         ${DEFAULT_PROFILE_VIEWER:-nano} "$PROFILE_PATH"
     ;;
 
+    -dp|--delete-profile)
+        PROFILE_NAME="$2"
+
+        ensure_profile_name_was_given
+
+        ensure_profile_folder_exists
+
+        PROFILE_PATH="${DEFAULT_PROFILE_FOLDER}/${PROFILE_NAME}.conf"
+
+        profile_not_found_404
+
+        echo -n "Are you sure you want to delete profile '$PROFILE_NAME'? [y/n]: "
+        while true
+        do
+            read confirm_del
+            case "$confirm_del" in
+                y)
+                    rm "$PROFILE_PATH"
+                    echo "Profile '$PROFILE_NAME' deleted."
+                    break
+                ;;
+
+                n)
+                    echo "Abort."
+                    break
+                ;;
+
+                *)
+                    echo -n "Incorrect answer, please answer again with 'y' or 'n': "
+                ;;
+            esac
+        done
+    ;;
+
+
 
     -h|-H|-?|--help)
         echo "> $(basename "$0") arguments:"
