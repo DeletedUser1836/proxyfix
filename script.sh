@@ -24,7 +24,8 @@ then
     echo "cat" > "$DEFAULT_PROFILE_VIEWER_FILE"
 fi
 
-ensure_profile_folder_exists() {
+ensure_profile_folder_exists()
+{
     if [[ ! -d "$DEFAULT_PROFILE_FOLDER" ]]
     then
         mkdir -p "$DEFAULT_PROFILE_FOLDER"
@@ -32,7 +33,14 @@ ensure_profile_folder_exists() {
         echo "To change it, use: proxyfix --set-default-profiles-folder <path>"
     fi
 }
-
+ensure_profile_name_was_given()
+{
+    if [[ -z "$PROFILE_NAME" ]]
+    then
+        echo "You must provide a profile name. Usage: proxyfix --save-profile <name>"
+        exit 1
+    fi
+}
 
 
 if [[ -z "$PROXCONF" ]]
@@ -229,11 +237,7 @@ case $1 in
     -sp|--save-profile)
         PROFILE_NAME="$2"
 
-        if [[ -z "$PROFILE_NAME" ]]
-        then
-            echo "You must provide a profile name. Usage: proxyfix --save-profile <name>"
-            exit 1
-        fi
+        ensure_profile_name_was_given
 
         ensure_profile_folder_exists
 
@@ -242,6 +246,49 @@ case $1 in
         grep -E '^\s*(socks4|socks5|http|https)\s+' "$PROXCONF" > "$PROFILE_PATH"
 
         echo "Saved profile '$PROFILE_NAME' to: $PROFILE_PATH"
+    ;;
+
+    -cp|--change-profile)
+        PROFILE_NAME="$2"
+
+        ensure_profile_name_was_given
+
+        ensure_profile_folder_exists
+
+        PROFILE_PATH="${DEFAULT_PROFILE_FOLDER}/${PROFILE_NAME}.conf"
+
+        if [[ ! -f "$PROFILE_PATH" ]]
+        then
+            echo "Profile '$PROFILE_NAME' not found in $DEFAULT_PROFILE_FOLDER"
+            exit 1
+        fi
+
+        echo -n "Are you sure you want to replace contents of $PROXCONF with profile '$PROFILE_NAME'? [y/n]: "
+        while true
+        do
+            read confirm_cp
+            case "$confirm_cp" in
+                y)
+                    echo "Replacing contents of $PROXCONF with profile '$PROFILE_NAME'..."
+                    TMP_CONF=$(mktemp)
+                    grep -vE '^\s*(socks4|socks5|http|https)\s+' "$PROXCONF" > "$TMP_CONF"
+                    cat "$TMP_CONF" > "$PROXCONF"
+                    cat "$PROFILE_PATH" >> "$PROXCONF"
+                    rm "$TMP_CONF"
+                    echo "Profile '$PROFILE_NAME' applied to $PROXCONF"
+                    break
+                ;;
+
+                n)
+                    echo "Abort."
+                    break
+                ;;
+
+                *)
+                    echo -n "Incorrect answer, please answer again with 'y' or 'n': "
+                ;;
+            esac
+        done
     ;;
 
 
