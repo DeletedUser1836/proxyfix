@@ -8,6 +8,23 @@
 
 PROXCONF=$(locate proxychains | grep -E '\.conf$' | head -n 1)
 
+# === Default global settings for profile system ===
+DEFAULT_PROFILE_DIR=$(cat "$DEFAULT_PROFILE_DIR_FILE")
+DEFAULT_PROFILE_VIEWER=$(cat "$DEFAULT_PROFILE_VIEWER_FILE")
+DEFAULT_PROFILE_DIR_FILE="$HOME/.proxyfix_default_profiles_dir"
+DEFAULT_PROFILE_VIEWER_FILE="$HOME/.proxyfix_default_profile_viewer"
+
+if [[ ! -f "$DEFAULT_PROFILE_DIR_FILE" ]]
+then
+    echo "$HOME/ProxyFixProfiles" > "$DEFAULT_PROFILE_DIR_FILE"
+fi
+
+if [[ ! -f "$DEFAULT_PROFILE_VIEWER_FILE" ]]
+then
+    echo "cat" > "$DEFAULT_PROFILE_VIEWER_FILE"
+fi
+
+
 if [[ -z "$PROXCONF" ]]
 then
     DEFAULT_CONF="/etc/proxychains.conf"
