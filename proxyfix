@@ -4,8 +4,8 @@
 #==INFO==                                               #
 #MADE BY: DeletedUser1836                               #
 #VERSION: 1.0.0.1                                       #
-#DATE OF CREATION: 04/05.2025                           #
-#LAST UPDATE: ??.??.????                                #
+#DATE OF CREATION: 04.05.2025                           #
+#LAST UPDATE: 10.04.2025                                #
 #                                                       #
 #==CREDITS==:                                           #
 # -me(main author)                                      #
@@ -18,8 +18,8 @@
 #########################################################
 
 # Comment to hide warning when not running as root
-if [ $USER != "root" ]; then
-    echo "You are not rooted (current user: $USER)"
+if [ "$(whoami)" != "root" ]; then
+    echo "You are not rooted (current user: $(whoami))"
     echo "This can cause issues while using the program"
 fi
 
@@ -79,7 +79,7 @@ profile_not_found_404()
     if [[ ! -f "$PROFILE_PATH" ]]
     then
         echo "Profile '$PROFILE_NAME' not found(404) in $DEFAULT_PROFILE_DIR"
-        exit 404
+        exit 255
     fi
 }
 
@@ -97,7 +97,7 @@ then
             echo "Do you want to install it?[y/n]"
             while true
             do
-                read confirm0
+                read -r confirm0
                 case "$confirm0" in
                     y)
                         sudo apt install proxychains
@@ -181,7 +181,7 @@ case $1 in
             echo -n "No proxies provided. Do you want to manually edit the file? [y/n]: "
             while true
             do
-                read confirm1
+                read -r confirm1
                 case "$confirm1" in
                     y)
                         sudo nano "$PROXCONF"
@@ -225,7 +225,7 @@ case $1 in
         echo "Are you sure that you want to clear the proxy list? [y/n]"
         while true
         do
-            read confirm2
+            read -r confirm2
             case "$confirm2" in
                 y)
                     echo "Clearing proxy list in $PROXCONF..."
@@ -360,7 +360,7 @@ case $1 in
                     ;;
                 *)
                     echo "'$NEW_EDITOR' is not supported. Choose from: nano, vi, gedit, code"
-                    read -rp "Try again. Enter valid editor: " $NEW_EDITOR
+                    read -rp "Try again. Enter valid editor: "
                     ;;
             esac
         done
@@ -395,7 +395,7 @@ case $1 in
         echo -n "Are you sure you want to replace contents of $PROXCONF with profile '$PROFILE_NAME'? [y/n]: "
         while true
         do
-            read confirm_cp
+            read -r confirm_cp
             case "$confirm_cp" in
                 y)
                     echo "Replacing contents of $PROXCONF with profile '$PROFILE_NAME'..."
@@ -449,7 +449,7 @@ case $1 in
         echo -n "Are you sure you want to delete profile '$PROFILE_NAME'? [y/n]: "
         while true
         do
-            read confirm_del
+            read -r confirm_del
             case "$confirm_del" in
                 y)
                     rm "$PROFILE_PATH"
